@@ -435,7 +435,7 @@ export default function App() {
               (b) => b.id === selectedBundle,
             )}
             network={networks.find((n) => n.id === selectedNetwork)!}
-            apiUrl={API_URL}
+            backendEndpoint={API_URL}
           />
         )}
 
@@ -575,7 +575,7 @@ function PaymentDetails({
   onSubmit, // Now accepts reference
   selectedBundle,
   network,
-  apiUrl,
+  backendEndpoint,
 }: {
   recipientNumber: string;
   onRecipientChange: (value: string) => void;
@@ -583,9 +583,11 @@ function PaymentDetails({
   onSubmit: (reference: any) => void;
   selectedBundle?: DataBundle;
   network: Network;
-  apiUrl: string;
+  backendEndpoint: string;
 }) {
   const isFormValid = recipientNumber.length >= 10;
+  console.log("PaymentDetails initializing with backend:", backendEndpoint);
+
 
   const price =
     parseFloat(selectedBundle?.price.replace("GH₵", "") || "0") * 100;
@@ -642,9 +644,10 @@ function PaymentDetails({
 
         <button
           onClick={async () => {
+            console.log("Initiating order with backend:", backendEndpoint);
             // 1. Create Pending Order
             try {
-              const res = await fetch(`${apiUrl}/orders`, {
+              const res = await fetch(`${backendEndpoint}/orders`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
