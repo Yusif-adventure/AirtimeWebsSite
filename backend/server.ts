@@ -5,6 +5,8 @@ import app from "./functions/server/index.tsx";
 
 const rootApp = new Hono();
 
+rootApp.get("/", (c) => c.text("Airtime Backend is Live!"));
+
 // Mount the imported app under /functions/v1
 rootApp.route("/functions/v1", app);
 

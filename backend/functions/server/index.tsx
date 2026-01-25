@@ -14,14 +14,8 @@ app.use(
   cors({
     // Security: Restrict to frontend domain only. Add production URL here.
     origin: (origin) => {
-      const allowedOrigins = ["http://localhost:5173", "http://localhost:4173"];
-      // Allow if explicitly allowed or if no origin (server-to-server mock)
-      if (!origin || allowedOrigins.includes(origin)) {
-        return origin;
-      }
-      // TODO: Return origin if it matches your production domain
-      // if (origin === "https://your-production-site.com") return origin;
-      return null;
+      // Allow all origins for production (since Vercel URLs vary)
+      return origin || "*";
     },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
