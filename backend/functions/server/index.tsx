@@ -146,7 +146,7 @@ async function sendAirtime(
 // --- ROUTES ---
 
 // Health check endpoint
-app.get("/make-server-e68f4b01/health", (c) => {
+app.get("/health", (c) => {
   return c.json({ status: "ok" });
 });
 
