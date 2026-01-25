@@ -120,11 +120,10 @@ const INITIAL_BUNDLES: Record<string, DataBundle[]> = {
   ],
 };
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:54321/functions/v1";
-
 export default function App() {
+  const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:54321/functions/v1";
+
   const [mode, setMode] = useState<"customer" | "admin">("customer");
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
 
