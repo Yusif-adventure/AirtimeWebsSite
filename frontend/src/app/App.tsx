@@ -121,6 +121,9 @@ const INITIAL_BUNDLES: Record<string, DataBundle[]> = {
 };
 
 export default function App() {
+  const API_URL =
+    import.meta.env.VITE_API_URL ||
+    "http://localhost:54321/functions/v1/make-server-e68f4b01";
   const [mode, setMode] = useState<"customer" | "admin">("customer");
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
 
@@ -161,9 +164,6 @@ export default function App() {
     if (mode === "admin" && isAdminLoggedIn) {
       const fetchOrders = async () => {
         try {
-          const API_URL =
-            import.meta.env.VITE_API_URL ||
-            "http://localhost:54321/functions/v1/make-server-e68f4b01";
           const response = await fetch(`${API_URL}/admin/orders`);
           const data = await response.json();
           if (data.success) {
@@ -244,7 +244,7 @@ export default function App() {
     // Sync with Server
     try {
       await fetch(
-        `http://localhost:54321/functions/v1/make-server-e68f4b01/admin/orders/${orderId}/status`,
+        `${API_URL}/admin/orders/${orderId}/status`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -288,10 +288,6 @@ export default function App() {
     setSelectedBundle(bundleId);
     setStep("payment");
   };
-
-  const API_URL =
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:54321/functions/v1/make-server-e68f4b01";
 
   const handlePaymentSubmit = async (data: {
     reference: any;
@@ -645,9 +641,6 @@ function PaymentDetails({
           onClick={async () => {
             // 1. Create Pending Order
             try {
-              const API_URL =
-                import.meta.env.VITE_API_URL ||
-                "http://localhost:54321/functions/v1/make-server-e68f4b01";
               const res = await fetch(`${API_URL}/orders`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
