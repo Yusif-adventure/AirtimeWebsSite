@@ -151,7 +151,7 @@ app.get("/make-server-e68f4b01/health", (c) => {
 });
 
 // Create Data Bundle Order
-app.post("/make-server-e68f4b01/orders", async (c) => {
+app.post("/orders", async (c) => {
   try {
     const body = await c.req.json();
     const {
@@ -207,7 +207,7 @@ app.post("/make-server-e68f4b01/orders", async (c) => {
 });
 
 // VERIFY Payment and Fulfill Order (Called by Frontend after success)
-app.post("/make-server-e68f4b01/orders/verify", async (c) => {
+app.post("/orders/verify", async (c) => {
   try {
     const { reference, orderId } = await c.req.json();
     const order = await kv.get(orderId);
@@ -265,7 +265,7 @@ app.post("/make-server-e68f4b01/orders/verify", async (c) => {
 });
 
 // SIMULATE Payment Success (For testing without real payment gateway)
-app.post("/make-server-e68f4b01/test/simulate-payment/:orderId", async (c) => {
+app.post("/test/simulate-payment/:orderId", async (c) => {
   try {
     const { orderId } = c.req.param();
     const order = await kv.get(orderId);
@@ -309,7 +309,7 @@ app.post("/make-server-e68f4b01/test/simulate-payment/:orderId", async (c) => {
 });
 
 // Get Order Status
-app.get("/make-server-e68f4b01/orders/:orderId", async (c) => {
+app.get("/orders/:orderId", async (c) => {
   try {
     const { orderId } = c.req.param();
     const order = await kv.get(orderId);
@@ -326,7 +326,7 @@ app.get("/make-server-e68f4b01/orders/:orderId", async (c) => {
 });
 
 // Admin: Get All Orders (In production, this needs auth)
-app.get("/make-server-e68f4b01/admin/orders", async (c) => {
+app.get("/admin/orders", async (c) => {
   try {
     const allOrders = await kv.getByPrefix("ord_");
     // Sort by date desc
@@ -343,7 +343,7 @@ app.get("/make-server-e68f4b01/admin/orders", async (c) => {
 });
 
 // Admin: Update Order Status
-app.post("/make-server-e68f4b01/admin/orders/:orderId/status", async (c) => {
+app.post("/admin/orders/:orderId/status", async (c) => {
   try {
     const { orderId } = c.req.param();
     const body = await c.req.json();
