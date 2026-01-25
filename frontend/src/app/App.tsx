@@ -435,6 +435,7 @@ export default function App() {
               (b) => b.id === selectedBundle,
             )}
             network={networks.find((n) => n.id === selectedNetwork)!}
+            apiUrl={API_URL}
           />
         )}
 
@@ -574,6 +575,7 @@ function PaymentDetails({
   onSubmit, // Now accepts reference
   selectedBundle,
   network,
+  apiUrl,
 }: {
   recipientNumber: string;
   onRecipientChange: (value: string) => void;
@@ -581,6 +583,7 @@ function PaymentDetails({
   onSubmit: (reference: any) => void;
   selectedBundle?: DataBundle;
   network: Network;
+  apiUrl: string;
 }) {
   const isFormValid = recipientNumber.length >= 10;
 
@@ -641,7 +644,7 @@ function PaymentDetails({
           onClick={async () => {
             // 1. Create Pending Order
             try {
-              const res = await fetch(`${API_URL}/orders`, {
+              const res = await fetch(`${apiUrl}/orders`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
