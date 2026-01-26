@@ -381,7 +381,7 @@ export default function App() {
             <span>Back</span>
           </button>
         ) : (
-          <div className="font-extrabold text-3xl tracking-tight bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-transparent bg-clip-text">
+          <div className="font-extrabold text-4xl tracking-tighter bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-transparent bg-clip-text drop-shadow-sm py-1">
             Firefly Ventures
           </div>
         )}
@@ -490,14 +490,20 @@ function NetworkSelection({
           <button
             key={network.id}
             onClick={() => onSelect(network.id)}
-            className="w-full aspect-square rounded-2xl shadow-lg transition-transform active:scale-95 border border-gray-100 overflow-hidden relative"
+            className="w-full aspect-square rounded-2xl shadow-xl hover:shadow-2xl transition-all active:scale-95 border-2 border-white overflow-hidden relative group"
             style={{ backgroundColor: network.color }}
           >
             <img
               src={network.logo}
               alt={network.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
+            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 flex items-end justify-start h-1/2">
+              <span className="text-white font-bold text-xl drop-shadow-md tracking-wide">
+                {network.name}
+              </span>
+            </div>
           </button>
         ))}
       </div>
