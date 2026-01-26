@@ -122,7 +122,8 @@ const INITIAL_BUNDLES: Record<string, DataBundle[]> = {
 
 export default function App() {
   const API_URL =
-    import.meta.env.VITE_API_URL || "https://airtimewebssite.onrender.com/functions/v1";
+    import.meta.env.VITE_API_URL ||
+    "https://airtimewebssite.onrender.com/functions/v1";
 
   const [mode, setMode] = useState<"customer" | "admin">("customer");
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
@@ -243,14 +244,11 @@ export default function App() {
 
     // Sync with Server
     try {
-      await fetch(
-        `${API_URL}/admin/orders/${orderId}/status`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
-        },
-      );
+      await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
     } catch (err) {
       console.error("Failed to persist status update:", err);
     }
@@ -587,7 +585,6 @@ function PaymentDetails({
 }) {
   const isFormValid = recipientNumber.length >= 10;
   console.log("PaymentDetails initializing with backend:", backendEndpoint);
-
 
   const price =
     parseFloat(selectedBundle?.price.replace("GH₵", "") || "0") * 100;

@@ -27,8 +27,7 @@ const memoryStore = new Map<string, any>();
 const client = () => {
   const url = process.env.SUPABASE_URL;
   // Try Service Role Key first, then fall back to Anon Key (SUPABASE_KEY)
-  const key =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 
   if (!url || !key) return null;
   return createClient(url, key, {
