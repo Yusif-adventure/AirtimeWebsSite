@@ -584,7 +584,6 @@ function PaymentDetails({
   backendEndpoint: string;
 }) {
   const isFormValid = recipientNumber.length >= 10;
-  console.log("PaymentDetails initializing with backend:", backendEndpoint);
 
   const price =
     parseFloat(selectedBundle?.price.replace("GH₵", "") || "0") * 100;
@@ -641,7 +640,6 @@ function PaymentDetails({
 
         <button
           onClick={async () => {
-            console.log("Initiating order with backend:", backendEndpoint);
             // 1. Create Pending Order
             try {
               const res = await fetch(`${backendEndpoint}/orders`, {
