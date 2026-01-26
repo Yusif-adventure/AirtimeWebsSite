@@ -9,6 +9,9 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
       - name: Ping Backend
         run: |
           curl -I https://airtimewebssite.onrender.com/functions/v1/health
