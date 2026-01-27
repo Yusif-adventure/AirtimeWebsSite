@@ -1,5 +1,22 @@
 {
+  "name": "airtime-website",
+  "version": "1.0.0",
+  "description": "Airtime Website",
+  "main": "backend/server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "cd backend && tsx server.ts"
+  },
   "dependencies": {
-    "react-paystack": "^6.0.0"
+    "@hono/node-server": "^1.11.1",
+    "@supabase/supabase-js": "^2.43.4",
+    "dotenv": "^16.4.5",
+    "hono": "^4.4.6",
+    "react-paystack": "^6.0.0",
+    "tsx": "^4.15.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "typescript": "^5.4.5"
   }
 }
