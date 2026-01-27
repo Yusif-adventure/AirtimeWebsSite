@@ -12,10 +12,12 @@ app.use("*", logger(console.log));
 app.use(
   "/*",
   cors({
-    // Security: Restrict to frontend domain only. Add production URL here.
     origin: (origin) => {
-      // Allow all origins for production (since Vercel URLs vary)
-      return origin || "*";
+      if (!origin) return "*";
+      if (origin === "http://localhost:5173") return origin;
+      if (origin.endsWith(".vercel.app")) return origin;
+      // Add more allowed origins as needed
+      return ""; // Block all others
     },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
