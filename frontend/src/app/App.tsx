@@ -3,11 +3,8 @@ import {
   Check,
   ArrowLeft,
   Lock,
-  Package,
-  User,
   Menu,
   Wallet,
-  Users,
   LayoutDashboard,
   History,
   Banknote,
@@ -46,14 +43,6 @@ type Order = {
   paymentNumber: string;
   status: "pending" | "completed" | "failed";
   timestamp: string;
-};
-
-type Withdrawal = {
-  id: string;
-  amount: number;
-  status: "pending" | "completed";
-  date: string;
-  method: string;
 };
 
 const networks: Network[] = [
@@ -330,15 +319,6 @@ export default function App() {
       setIsProcessing(false);
       setStep("payment");
     }
-  };
-
-  const handlePaymentComplete = () => {
-    // Reset everything and go back to network selection
-    setStep("network");
-    setSelectedNetwork("");
-    setSelectedBundle("");
-    setRecipientNumber("");
-    setIsProcessing(false);
   };
 
   const handleBuyAgain = () => {
