@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Check,
   ArrowLeft,
@@ -664,6 +664,9 @@ function PaymentDetails({
           <p className="text-sm text-gray-500 mt-2">
             Number that will receive the data
           </p>
+          <p className="text-sm text-amber-600 mt-1 font-medium">
+            ⚠️ Order to a wrong number cannot be reversed
+          </p>
         </div>
 
         {/* Payment Number and Email inputs removed */}
@@ -1037,42 +1040,48 @@ function AdminDashboard({
     }
   };
 
-  // Filter orders by date range
-  const filteredOrders = orders.filter((order) => {
-    const orderDate = order.timestamp
-      ? new Date(order.timestamp).toISOString().split("T")[0]
-      : "";
-    return orderDate >= dateRange.start && orderDate <= dateRange.end;
-  });
+  // Filter orders by date range (memoized for performance)
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const orderDate = order.timestamp
+        ? new Date(order.timestamp).toISOString().split("T")[0]
+        : "";
+      return orderDate >= dateRange.start && orderDate <= dateRange.end;
+    });
+  }, [orders, dateRange.start, dateRange.end]);
 
-  // Calculate Metrics
-  const totalSales = filteredOrders
-    .filter((o) => o.status === "completed")
-    .reduce((acc, curr) => acc + getPriceValue(curr.price), 0);
+  // Calculate Metrics (memoized for performance)
+  const totalSales = useMemo(() => {
+    return filteredOrders
+      .filter((o) => o.status === "completed")
+      .reduce((acc, curr) => acc + getPriceValue(curr.price), 0);
+  }, [filteredOrders]);
 
-  const totalCommission = filteredOrders
-    .filter((o) => o.status === "completed")
-    .reduce((acc, curr) => {
-      const selling = getPriceValue(curr.price);
-      let cost = 0;
+  const totalCommission = useMemo(() => {
+    return filteredOrders
+      .filter((o) => o.status === "completed")
+      .reduce((acc, curr) => {
+        const selling = getPriceValue(curr.price);
+        let cost = 0;
 
-      // Attempt to find configured cost based on order details
-      // We map the network display name back to an ID to lookup bundles
-      const net = networks.find(
-        (n) => n.name === curr.network || n.id === curr.network,
-      );
-      if (net && bundles[net.id]) {
-        const bun = bundles[net.id].find((b) => b.data === curr.bundle);
-        if (bun) {
-          cost = costPrices[bun.id] || 0;
+        // Attempt to find configured cost based on order details
+        // We map the network display name back to an ID to lookup bundles
+        const net = networks.find(
+          (n) => n.name === curr.network || n.id === curr.network,
+        );
+        if (net && bundles[net.id]) {
+          const bun = bundles[net.id].find((b) => b.data === curr.bundle);
+          if (bun) {
+            cost = costPrices[bun.id] || 0;
+          }
         }
-      }
 
-      // Fallback if no specific cost set: 85% of selling price
-      if (cost === 0) cost = selling * 0.85;
+        // Fallback if no specific cost set: 85% of selling price
+        if (cost === 0) cost = selling * 0.85;
 
-      return acc + (selling - cost);
-    }, 0);
+        return acc + (selling - cost);
+      }, 0);
+  }, [filteredOrders, bundles, costPrices]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
