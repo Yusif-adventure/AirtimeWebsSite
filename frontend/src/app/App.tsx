@@ -501,7 +501,7 @@ function NetworkSelection({
           Affordable Data Bundles
         </h1>
         <p className="text-gray-500 font-medium">
-          Choose your network to get started 🚀
+          Choose your network to get started
         </p>
       </div>
 
