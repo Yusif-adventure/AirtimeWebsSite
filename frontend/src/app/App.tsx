@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Check,
   ArrowLeft,
@@ -128,14 +128,36 @@ export default function App() {
     return saved ? JSON.parse(saved) : {};
   });
 
-  // Persist pricing changes
-  useEffect(() => {
-    localStorage.setItem("airtime_bundles", JSON.stringify(bundles));
-  }, [bundles]);
+  // Track unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const isInitialLoad = useRef(true);
 
-  useEffect(() => {
+  // Function to handle tab switching with unsaved changes confirmation
+  const handleTabSwitch = (newTab: typeof activeTab) => {
+    if (hasUnsavedChanges && activeTab === "pricing") {
+      const confirmLeave = window.confirm(
+        "You have unsaved pricing changes. Are you sure you want to leave? Your changes will be lost."
+      );
+      if (!confirmLeave) return;
+    }
+    setActiveTab(newTab);
+  };
+
+  // Function to save all pricing changes
+  const savePricingChanges = () => {
+    localStorage.setItem("airtime_bundles", JSON.stringify(bundles));
     localStorage.setItem("airtime_cost_prices", JSON.stringify(costPrices));
-  }, [costPrices]);
+    setHasUnsavedChanges(false);
+  };
+
+  // Track changes for unsaved indicator (skip initial load)
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
+    setHasUnsavedChanges(true);
+  }, [bundles, costPrices]);
 
   const [step, setStep] = useState<
     "network" | "package" | "payment" | "confirmation"
@@ -215,6 +237,12 @@ export default function App() {
   };
 
   const handleAdminLogout = async () => {
+    if (hasUnsavedChanges) {
+      const confirmLeave = window.confirm(
+        "You have unsaved pricing changes. Are you sure you want to logout? Your changes will be lost."
+      );
+      if (!confirmLeave) return;
+    }
     await supabase.auth.signOut();
     setIsAdminLoggedIn(false);
     setMode("customer");
@@ -249,7 +277,15 @@ export default function App() {
       return (
         <AdminLogin
           onLogin={handleAdminLogin}
-          onBackToCustomer={() => setMode("customer")}
+          onBackToCustomer={() => {
+            if (hasUnsavedChanges) {
+              const confirmLeave = window.confirm(
+                "You have unsaved pricing changes. Are you sure you want to switch to customer mode? Your changes will be lost."
+              );
+              if (!confirmLeave) return;
+            }
+            setMode("customer");
+          }}
         />
       );
     }
@@ -262,6 +298,8 @@ export default function App() {
         setBundles={setBundles}
         costPrices={costPrices}
         setCostPrices={setCostPrices}
+        hasUnsavedChanges={hasUnsavedChanges}
+        savePricingChanges={savePricingChanges}
       />
     );
   }
@@ -350,10 +388,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Update Banner */}
-      <div className="w-full bg-green-100 border-b border-green-300 text-green-800 text-center py-2 font-semibold text-lg">
-        🚀 i tille update
-      </div>
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 flex justify-between items-center">
         {step !== "network" && step !== "confirmation" ? (
@@ -418,6 +452,8 @@ export default function App() {
             )}
             network={networks.find((n) => n.id === selectedNetwork)!}
             backendEndpoint={API_URL}
+            isProcessing={isProcessing}
+            setIsProcessing={setIsProcessing}
           />
         )}
 
@@ -564,6 +600,8 @@ function PaymentDetails({
   selectedBundle,
   network,
   backendEndpoint,
+  isProcessing,
+  setIsProcessing,
 }: {
   recipientNumber: string;
   onRecipientChange: (value: string) => void;
@@ -572,6 +610,8 @@ function PaymentDetails({
   selectedBundle?: DataBundle;
   network: Network;
   backendEndpoint: string;
+  isProcessing: boolean;
+  setIsProcessing: (value: boolean) => void;
 }) {
   const isFormValid = recipientNumber.length >= 10;
 
@@ -630,6 +670,7 @@ function PaymentDetails({
 
         <button
           onClick={async () => {
+            setIsProcessing(true);
             // 1. Create Pending Order
             try {
               const res = await fetch(`${backendEndpoint}/orders`, {
@@ -655,21 +696,22 @@ function PaymentDetails({
               initializePayment({
                 onSuccess: (reference) =>
                   onSubmit({ reference, orderId, order }),
-                onClose: () => console.log("closed"),
+                onClose: () => setIsProcessing(false),
               });
             } catch (e) {
               alert("Could not initiate order. Please try again.");
               console.error(e);
+              setIsProcessing(false);
             }
           }}
-          disabled={!isFormValid}
+          disabled={!isFormValid || isProcessing}
           className={`w-full text-xl font-bold py-5 rounded-xl shadow-lg transition-all ${
-            isFormValid
+            isFormValid && !isProcessing
               ? "bg-indigo-600 text-white active:scale-95"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
-          Pay {selectedBundle?.price}
+          {isProcessing ? "Processing..." : `Pay ${selectedBundle?.price}`}
         </button>
       </div>
     </div>
@@ -862,6 +904,8 @@ function AdminDashboard({
   setBundles,
   costPrices,
   setCostPrices,
+  hasUnsavedChanges,
+  savePricingChanges,
 }: {
   orders: Order[];
   onLogout: () => void;
@@ -875,10 +919,23 @@ function AdminDashboard({
   >;
   costPrices: Record<string, number>;
   setCostPrices: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  hasUnsavedChanges: boolean;
+  savePricingChanges: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "orders" | "pricing" | "settings"
   >("dashboard");
+
+  // Function to handle internal tab switching with unsaved changes confirmation
+  const handleInternalTabSwitch = (newTab: typeof activeTab) => {
+    if (hasUnsavedChanges && activeTab === "pricing") {
+      const confirmLeave = window.confirm(
+        "You have unsaved pricing changes. Are you sure you want to leave? Your changes will be lost."
+      );
+      if (!confirmLeave) return;
+    }
+    setActiveTab(newTab);
+  };
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -1047,7 +1104,7 @@ function AdminDashboard({
       <div className="bg-white px-2 pt-2 border-b overflow-x-auto no-scrollbar">
         <div className="flex gap-4 min-w-max">
           <button
-            onClick={() => setActiveTab("dashboard")}
+            onClick={() => handleInternalTabSwitch("dashboard")}
             className={`flex items-center gap-2 px-4 py-3 rounded-t-lg border-b-2 transition-colors ${
               activeTab === "dashboard"
                 ? "border-indigo-600 text-indigo-600 bg-indigo-50"
@@ -1059,7 +1116,7 @@ function AdminDashboard({
           </button>
 
           <button
-            onClick={() => setActiveTab("orders")}
+            onClick={() => handleInternalTabSwitch("orders")}
             className={`flex items-center gap-2 px-4 py-3 rounded-t-lg border-b-2 transition-colors ${
               activeTab === "orders"
                 ? "border-indigo-600 text-indigo-600 bg-indigo-50"
@@ -1071,7 +1128,7 @@ function AdminDashboard({
           </button>
 
           <button
-            onClick={() => setActiveTab("pricing")}
+            onClick={() => handleInternalTabSwitch("pricing")}
             className={`flex items-center gap-2 px-4 py-3 rounded-t-lg border-b-2 transition-colors ${
               activeTab === "pricing"
                 ? "border-indigo-600 text-indigo-600 bg-indigo-50"
@@ -1083,7 +1140,7 @@ function AdminDashboard({
           </button>
 
           <button
-            onClick={() => setActiveTab("settings")}
+            onClick={() => handleInternalTabSwitch("settings")}
             className={`flex items-center gap-2 px-4 py-3 rounded-t-lg border-b-2 transition-colors ${
               activeTab === "settings"
                 ? "border-indigo-600 text-indigo-600 bg-indigo-50"
@@ -1311,14 +1368,44 @@ function AdminDashboard({
           {activeTab === "pricing" && (
             <div className="space-y-6">
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-5 border-b bg-gray-50">
-                  <h3 className="font-bold text-gray-900">
-                    Manage Prices & Profit
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Set the Cost Price (what you pay) and Selling Price (what
-                    customers see). Your profit is calculated automatically.
-                  </p>
+                <div className="p-6 border-b bg-gradient-to-r from-gray-50 to-blue-50/30">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-xl text-gray-900 flex items-center gap-2">
+                        <span className="text-2xl">💰</span>
+                        Manage Prices & Profit
+                      </h3>
+                      <p className="text-sm text-gray-600 max-w-md">
+                        Set the Cost Price (what you pay) and Selling Price (what
+                        customers see). Your profit is calculated automatically.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {hasUnsavedChanges && (
+                        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-lg animate-pulse">
+                          <span className="text-lg">⚠️</span>
+                          <span className="font-medium">Unsaved changes</span>
+                        </div>
+                      )}
+                      <button
+                        onClick={savePricingChanges}
+                        disabled={!hasUnsavedChanges}
+                        className={`relative px-8 py-3 rounded-xl font-bold text-sm transition-all duration-200 transform ${
+                          hasUnsavedChanges
+                            ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 hover:scale-105 shadow-lg hover:shadow-xl active:scale-95"
+                            : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">💾</span>
+                          <span>Save All Changes</span>
+                          {hasUnsavedChanges && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
