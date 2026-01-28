@@ -16,6 +16,8 @@ app.use(
       const allowedOrigins = [
         "http://localhost:5173",
         "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:3000",
         "https://airtime-webs-site.vercel.app",
         "https://airtime-webs-site-8npdw17r1-yusifs-projects-3f2b85bf.vercel.app"
       ];
