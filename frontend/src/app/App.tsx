@@ -350,6 +350,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Update Banner */}
+      <div className="w-full bg-green-100 border-b border-green-300 text-green-800 text-center py-2 font-semibold text-lg">
+        🚀 i tille update
+      </div>
       {/* Header */}
       <div className="bg-white border-b px-4 py-4 flex justify-between items-center">
         {step !== "network" && step !== "confirmation" ? (
