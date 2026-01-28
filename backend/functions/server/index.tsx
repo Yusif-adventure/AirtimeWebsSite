@@ -13,11 +13,14 @@ app.use(
   "/*",
   cors({
     origin: (origin) => {
-      if (!origin) return "*";
-      if (origin === "http://localhost:5173") return origin;
-      if (origin.endsWith(".vercel.app")) return origin;
-      // Add more allowed origins as needed
-      return ""; // Block all others
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "https://airtime-webs-site.vercel.app",
+        "https://airtime-webs-site-8npdw17r1-yusifs-projects-3f2b85bf.vercel.app"
+      ];
+      if (!origin) return allowedOrigins[0]; // Default to localhost for dev tools
+      if (allowedOrigins.includes(origin)) return origin;
+      return undefined; // Block all others
     },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
