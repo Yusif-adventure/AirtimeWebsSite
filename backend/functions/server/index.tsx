@@ -19,7 +19,8 @@ app.use(
         "http://localhost:5175",
         "http://localhost:3000",
         "https://airtime-webs-site.vercel.app",
-        "https://airtime-webs-site-8npdw17r1-yusifs-projects-3f2b85bf.vercel.app"
+        "https://airtime-webs-site-8npdw17r1-yusifs-projects-3f2b85bf.vercel.app",
+        "https://airtime-webs-site-23f2.vercel.app"
       ];
       if (!origin) return allowedOrigins[0]; // Default to localhost for dev tools
       if (allowedOrigins.includes(origin)) return origin;
