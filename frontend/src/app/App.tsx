@@ -90,7 +90,7 @@ const INITIAL_BUNDLES: Record<string, DataBundle[]> = {
     { id: "mtn-10", data: "20GB", price: "GH₵84" },
   ],
   telecel: [
-    { id: "telecel-1", data: "5GB", price: "GH₵19.5" },
+    { id: "telecel-1", data: "5GB", price: "GH₵22" },
     { id: "telecel-2", data: "10GB", price: "GH₵43" },
     { id: "telecel-3", data: "15GB", price: "GH₵58" },
     { id: "telecel-4", data: "20GB", price: "GH₵78" },
